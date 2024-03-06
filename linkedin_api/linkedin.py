@@ -677,6 +677,36 @@ class Linkedin(object):
 
         return skills
 
+    def get_profile_skills_with_endorsements(self, public_id=None, urn_id=None):
+        """Fetch the skill listed on a given LinkedIn profile.
+
+        :param public_id: LinkedIn public ID for a profile
+        :type public_id: str, optional
+        :param urn_id: LinkedIn URN ID for a profile
+        :type urn_id: str, optional
+
+
+        :return: Dictionary of skills with their endorsement count
+        :rtype: dict
+        """
+        params = {"includeHiddenEndorsers": True}
+        res = self._fetch(
+            f"/identity/profiles/{public_id or urn_id}/skillCategory", params=params
+        )
+        data = res.json()
+        categories = data.get("elements", [])
+
+        endorsements = {}
+        for category in categories:
+            skills = category.get("endorsedSkills")
+            for skill in skills:
+                name = skill.get("skill").get("name")
+                count = skill.get("endorsementCount")
+                endorsements[name] = count
+
+        return endorsements
+
+
     def get_profile(self, public_id=None, urn_id=None):
         """Fetch data for a given LinkedIn profile.
 
