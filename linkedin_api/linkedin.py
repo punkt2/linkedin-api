@@ -706,6 +706,35 @@ class Linkedin(object):
 
         return endorsements
 
+    def get_profile_recommendations(self, public_id=None, urn_id=None):
+        """Fetch the recommendations listed on a given LinkedIn profile.
+
+        :param public_id: LinkedIn public ID for a profile
+        :type public_id: str, optional
+        :param urn_id: LinkedIn URN ID for a profile
+        :type urn_id: str, optional
+
+
+        :return: List of skill objects
+        :rtype: list
+        """
+        params = {"q": "received"}
+        res = self._fetch(
+            f"/identity/profiles/{public_id or urn_id}/recommendations", params=params
+        )
+        data = res.json()
+        items = data.get("elements", [])
+
+        recommendations = []
+        for item in items:
+            recommendations.append({
+                "firstName": item["recommender"]["firstName"],
+                "lastName": item["recommender"]["lastName"],
+                "text": item["recommendationText"],
+                "created": item["created"],
+            })
+
+        return recommendations
 
     def get_profile(self, public_id=None, urn_id=None):
         """Fetch data for a given LinkedIn profile.
